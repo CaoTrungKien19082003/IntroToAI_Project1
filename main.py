@@ -1,32 +1,3 @@
-# main.py
-"""
-Unified Benchmark — Metaheuristics vs Classic Algorithms
-=========================================================
-PART 1  Continuous problems (small scale, dim=10)
-          Sphere · Rosenbrock · Rastrigin · Ackley · Griewank
-          Meta + Classic [C] side-by-side; 3-D landscape plots included.
-
-PART 2  Discrete problems — TOY scale (for algorithm concept demo)
-          TSP 6 cities · Knapsack 10 items · Graph Coloring 6 vertices
-          Shortest Path 6 nodes
-          Classic algorithms use swap-neighbourhood; results compare meta vs
-          textbook graph-search on intentionally small instances.
-
-PART 3  Discrete problems — REALISTIC scale (scalability stress test)
-          TSP 20 cities · Knapsack 50 items · Graph Coloring 20 vertices
-          Shortest Path 15 nodes
-          Classic BFS/DFS/A*/Greedy/UCS hit a node cap → suboptimal.
-          HC/SA use problem-specific operators (2-opt, bit-flip, recolor).
-          Problem maps saved as map_*.png before the run begins.
-
-Output files
-  stats_<problem>.txt          — mean/std/best/worst/time table
-  convergence_<problem>.png
-  timecost_<problem>.png
-  barcomp_<problem>.png
-  landscape_<problem>.png      — 3-D + contour (continuous only)
-  map_<problem>.png            — problem structure (large discrete only)
-"""
 
 import os, sys, time, random, heapq
 import numpy as np
@@ -45,29 +16,18 @@ from algorithms.classic_algorithms import (
 
 _CLASSIC_KEYS = {"BFS", "DFS", "UCS", "Greedy", "A*", "HC", "SA"}
 
-# ═══════════════════════════════════════════════════════════════════════════════
-#  CONFIG — SMALL BENCHMARK  (Parts 1 & 2)
-# ═══════════════════════════════════════════════════════════════════════════════
-SMALL_NUM_RUNS = 20    # was 2 — Std meaningless with < 10 runs
+SMALL_NUM_RUNS = 20 
 SMALL_POP_SIZE = 60
-SMALL_MAX_ITER = 500   # was 200 — SA needs ~1400 iters to converge properly
+SMALL_MAX_ITER = 500 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-#  CONFIG — LARGE BENCHMARK  (Part 3)
-# ═══════════════════════════════════════════════════════════════════════════════
 LARGE_NUM_RUNS  = 20
 LARGE_POP_SIZE  = 80
 LARGE_MAX_ITER  = 400
-LARGE_NODE_CAP  = 4_000   # max states BFS/DFS/A*/Greedy/UCS may expand per run
+LARGE_NODE_CAP  = 4_000   
 LARGE_HC_ITER   = 50_000
 LARGE_SA_ITER   = 50_000
 LARGE_SA_T0     = 800.0
 LARGE_SA_ALPHA  = 0.9985
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  PART 1 — CONTINUOUS PROBLEM DEFINITIONS
-# ═══════════════════════════════════════════════════════════════════════════════
 
 def sphere(x):     return float(np.sum(x**2))
 def rosenbrock(x): return float(np.sum(100*(x[1:]-x[:-1]**2)**2 + (1-x[:-1])**2))
@@ -87,15 +47,6 @@ CONT_PROBLEMS = {
     "Ackley":     (ackley,     np.array([[-32.768, 32.768]]*10)),
     "Griewank":   (griewank,   np.array([[-600,    600   ]]*10)),
 }
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  PART 2 — TOY DISCRETE PROBLEM DEFINITIONS
-# ═══════════════════════════════════════════════════════════════════════════════
-
-# ── Toy problem factory functions — each returns a fresh random instance ─────
-# Uses np.random.RandomState(seed) so instance generation never touches the
-# global RNG, keeping algorithm seeds clean.
 
 def _make_toy_tsp(seed):
     """6-city TSP on a random Euclidean grid.
@@ -180,11 +131,6 @@ def _make_toy_sp(seed):
     return sp_fit, cost, heu, bounds, S, G
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-#  PART 3 — LARGE DISCRETE PROBLEM DEFINITIONS
-# ═══════════════════════════════════════════════════════════════════════════════
-
-# ── TSP 20 cities ─────────────────────────────────────────────────────────────
 _L_N_CITIES = 20
 np.random.seed(7)
 _L_coords   = np.random.randint(10, 291, (_L_N_CITIES, 2)).astype(np.float64)
@@ -223,7 +169,6 @@ def _L_tsp_all_2opt(tour):
             nb=tour[:]; nb[i:j+1]=nb[i:j+1][::-1]; nbs.append(nb)
     return nbs
 
-# ── Knapsack 50 items ─────────────────────────────────────────────────────────
 _L_N_ITEMS=50
 np.random.seed(13)
 _L_KW  = np.random.randint(1,21,_L_N_ITEMS)
@@ -256,7 +201,6 @@ def _L_ks_dp_optimal():
             if dp[c-w]+v>dp[c]: dp[c]=dp[c-w]+v
     return int(dp[_L_KCAP])
 
-# ── GCP 20 vertices ───────────────────────────────────────────────────────────
 _L_N_VERT=20; _L_N_COLORS=5
 np.random.seed(21)
 _L_r=np.random.rand(_L_N_VERT,_L_N_VERT)
@@ -292,7 +236,6 @@ def _L_gcp_greedy_ref():
         colors[v]=next(c for c in range(_L_N_VERT) if c not in used)
     return len(set(colors)), L_gcp_fit(colors)
 
-# ── SP 15 nodes ───────────────────────────────────────────────────────────────
 _L_N_NODES=15; _L_SP_S,_L_SP_G=0,_L_N_NODES-1
 np.random.seed(42)
 _L_raw=np.random.rand(_L_N_NODES,_L_N_NODES)
@@ -325,11 +268,6 @@ def _L_dijkstra_optimal():
                 nd=d+L_SP_COST[u,v]
                 if nd<dist.get(v,np.inf): dist[v]=nd; heapq.heappush(pq,(nd,v))
     return dist.get(_L_SP_G,np.inf)
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  SHARED PLOT & STATS HELPERS
-# ═══════════════════════════════════════════════════════════════════════════════
 
 _TAB20=plt.cm.get_cmap('tab20'); _MARKERS=list("osD^vPhX<>p*")
 def _col(i,n): return _TAB20(i/max(n-1,1))
@@ -472,11 +410,6 @@ def plot_3d(objective, bounds, name):
     fig.colorbar(cf,ax=ax2); plt.tight_layout()
     p=f"landscape_{name}.png"; plt.savefig(p,dpi=150,bbox_inches='tight'); plt.close(); print(f"  Saved: {p}")
 
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  SMALL BENCHMARK RUNNERS  (Parts 1 & 2)
-# ═══════════════════════════════════════════════════════════════════════════════
-
 class _NpMinHeap:
     def __init__(self,cap,row_w):
         self._buf=np.empty((cap,1+row_w),dtype=np.float64); self._size=np.int64(0)
@@ -614,11 +547,6 @@ def _wrap_toy(raw_runs, n_iter):
         out.append({**r,"best_fitness":bf,"history":[bf]*(n_iter+1),"diversity":[0.0]*(n_iter+1)})
     return out
 
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  LARGE BENCHMARK RUNNERS  (Part 3)
-# ═══════════════════════════════════════════════════════════════════════════════
-
 def _run_large(algo_func, obj, bounds):
     t0=time.time()
     try:
@@ -724,11 +652,6 @@ def _run_classic_sp(algo_func):
     except Exception: cost=np.inf
     return cost,time.time()-t0
 
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  PROBLEM MAP VISUALISATIONS  (Part 3)
-# ═══════════════════════════════════════════════════════════════════════════════
-
 def save_problem_maps(nn_ref, ks_dp_opt, gcp_nc, sp_opt):
     # TSP
     fig,axes=plt.subplots(1,2,figsize=(14,6))
@@ -810,11 +733,6 @@ def save_problem_maps(nn_ref, ks_dp_opt, gcp_nc, sp_opt):
     ax.set_title(f"In/Out Degree  |  {int((L_SP_COST>0).sum())} edges total")
     ax.set_xticks(xn); ax.legend(fontsize=8); ax.grid(True,alpha=0.25,axis='y')
     plt.tight_layout(); plt.savefig("map_SP.png",dpi=150,bbox_inches='tight'); plt.close(); print("  Saved: map_SP.png")
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  PROBLEM MAP VISUALISATIONS  (Part 2 — Toy)
-# ═══════════════════════════════════════════════════════════════════════════════
 
 def save_toy_maps(seed=42):
     """Generate map PNGs for the toy problems using the seed-42 instance."""
@@ -936,15 +854,7 @@ def save_toy_maps(seed=42):
     plt.tight_layout(); plt.savefig("map_toy_SP.png",dpi=150,bbox_inches='tight'); plt.close()
     print("  Saved: map_toy_SP.png")
 
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  MAIN
-# ═══════════════════════════════════════════════════════════════════════════════
 if __name__ == "__main__":
-
-    # ══════════════════════════════════════════════════════════════════════════
-    #  PART 1 — CONTINUOUS PROBLEMS
-    # ══════════════════════════════════════════════════════════════════════════
     print("\n"+"="*65)
     print("  PART 1 — CONTINUOUS PROBLEMS  (Meta + Classic)")
     print(f"  NUM_RUNS={SMALL_NUM_RUNS}  POP_SIZE={SMALL_POP_SIZE}  MAX_ITER={SMALL_MAX_ITER}")
@@ -978,9 +888,6 @@ if __name__ == "__main__":
     for prob_name,(obj,bounds) in CONT_PROBLEMS.items():
         plot_3d(obj,bounds,prob_name)
 
-    # ══════════════════════════════════════════════════════════════════════════
-    #  PART 2 — TOY DISCRETE PROBLEMS
-    # ══════════════════════════════════════════════════════════════════════════
     print("\n"+"="*65)
     print("  PART 2 — TOY DISCRETE PROBLEMS  (Meta + Classic)")
     print(f"  NUM_RUNS={SMALL_NUM_RUNS}  POP_SIZE={SMALL_POP_SIZE}  MAX_ITER={SMALL_MAX_ITER}")
@@ -991,7 +898,6 @@ if __name__ == "__main__":
 
     TOY_PROBLEMS = ["TSP", "Knapsack", "GraphColoring", "ShortestPath"]
 
-    # precompute per-run NN bounds for TSP (instance changes each run)
     _toy_tsp_nn_bounds = []
     for rid in range(SMALL_NUM_RUNS):
         _,fit,_,_,_,_,(coords,dist) = _make_toy_tsp(42+rid)
@@ -1054,9 +960,6 @@ if __name__ == "__main__":
         nn = _toy_tsp_mean_nn if prob_name=="TSP" else None
         export_stats(f"toy_{prob_name}",combined,nn_bound=nn)
 
-    # ══════════════════════════════════════════════════════════════════════════
-    #  PART 3 — LARGE DISCRETE PROBLEMS
-    # ══════════════════════════════════════════════════════════════════════════
     print("\n"+"="*65)
     print("  PART 3 — LARGE DISCRETE PROBLEMS  (Scalability Stress Test)")
     print(f"  NUM_RUNS={LARGE_NUM_RUNS}  POP_SIZE={LARGE_POP_SIZE}  MAX_ITER={LARGE_MAX_ITER}")
@@ -1100,7 +1003,6 @@ if __name__ == "__main__":
     plot_bar(        f"TSP ({_L_N_CITIES} cities)",res_tsp,ref_line=nn_ref,ref_label=f"NN bound ({nn_ref:.0f})",save_name="large_TSP")
     export_stats("TSP_large",res_tsp,nn_bound=nn_ref)
 
-    # ── Knapsack ──────────────────────────────────────────────────────────────
     print(f"\n{'─'*65}\n  [KP] {_L_N_ITEMS} items  cap={_L_KCAP}  |  DP optimal={ks_dp_opt}\n{'─'*65}")
     res_ks={}
     for aname,afunc in META_ALGORITHMS.items():
@@ -1130,7 +1032,6 @@ if __name__ == "__main__":
     plot_bar(        f"Knapsack ({_L_N_ITEMS} items)",res_ks,ref_line=-float(ks_dp_opt),ref_label=f"DP optimal (−{ks_dp_opt})",save_name="large_KP")
     export_stats("KP_large",res_ks)
 
-    # ── Graph Coloring ────────────────────────────────────────────────────────
     print(f"\n{'─'*65}\n  [GCP] {_L_N_VERT} vertices  {_L_N_EDGES} edges  {_L_N_COLORS} colors  |  greedy={gcp_nc} colors\n{'─'*65}")
     res_gcp={}
     for aname,afunc in META_ALGORITHMS.items():
@@ -1157,7 +1058,6 @@ if __name__ == "__main__":
     plot_bar(        f"GCP ({_L_N_VERT} vertices)",res_gcp,ref_line=0,ref_label="Optimal (0 conflicts)",save_name="large_GCP")
     export_stats("GCP_large",res_gcp)
 
-    # ── Shortest Path ─────────────────────────────────────────────────────────
     print(f"\n{'─'*65}\n  [SP] {_L_N_NODES} nodes  0→{_L_SP_G}  |  Dijkstra optimal={sp_opt:.1f}\n{'─'*65}")
     res_sp={}
     for aname,afunc in META_ALGORITHMS.items():
