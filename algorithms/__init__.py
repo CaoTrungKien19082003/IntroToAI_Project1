@@ -1,5 +1,3 @@
-# algorithms/__init__.py
-
 from .classic_algorithms import (
     bfs, dfs, ucs,
     greedy_best_first_search,
@@ -21,7 +19,6 @@ from .continuous_classic_algorithms import (
     astar_continuous, ucs_continuous, hc_continuous, sa_continuous,
 )
 
-# ── Metaheuristics (same interface: objective, bounds, pop_size, max_iter) ────
 META_ALGORITHMS = {
     "GA":   genetic_algorithm,
     "DE":   differential_evolution,
@@ -34,7 +31,6 @@ META_ALGORITHMS = {
     "TLBO": teaching_learning_based_optimization,
 }
 
-# ── Classic graph/combinatorial algorithms (graph_cost, heuristic, start, goal) ─
 CLASSIC_ALGOS = {
     "BFS":    bfs,
     "DFS":    dfs,
@@ -45,7 +41,6 @@ CLASSIC_ALGOS = {
     "SA":     simulated_annealing_graph,
 }
 
-# ── Classic algorithms for CONTINUOUS functions (same interface as META_ALGORITHMS) ─
 CONTINUOUS_CLASSIC_ALGOS = {
     "BFS":    bfs_continuous,
     "DFS":    dfs_continuous,

@@ -22,15 +22,9 @@ def simulated_annealing_graph(cost_matrix, heuristic, start, goal):
 
 
 def simulated_annealing_continuous(objective, bounds, pop_size=30, max_iter=500):
-    """
-    Single SA chain with total_iters = pop_size * max_iter evaluations —
-    same budget as population-based algos (e.g. PSO/DE/GA).
-    History is checkpointed every pop_size steps → len == max_iter+1.
-    Cooling: T0=1000 → T≈1 over the full budget.
-    """
     n_dims      = bounds.shape[0]
     total_iters = pop_size * max_iter
-    cool        = (1e-3) ** (1.0 / total_iters)   # 1000 → ~1 over total_iters steps
+    cool        = (1e-3) ** (1.0 / total_iters) 
     sigma       = 0.1 * (bounds[:, 1] - bounds[:, 0])
 
     current     = np.random.uniform(bounds[:, 0], bounds[:, 1])

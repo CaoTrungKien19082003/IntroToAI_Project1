@@ -96,15 +96,7 @@ def artificial_bee_colony(objective, bounds, pop_size, max_iter):
 
 
 def firefly_algorithm(objective, bounds, pop_size, max_iter):
-    """
-    Vectorised Firefly Algorithm — same eval budget as all other algorithms.
-
-    Key fix: accumulate ALL attraction moves for firefly i across all j
-    brighter than it, THEN evaluate once per firefly per iteration.
-    Original nested loop called objective() O(pop^2 * iter) times;
-    this version calls it O(pop * iter) times — identical budget to GA/PSO/etc.
-    """
-    n            = bounds.shape[0]
+    n = bounds.shape[0]
     lower, upper = bounds[:, 0], bounds[:, 1]
     pos = np.random.uniform(lower, upper, (pop_size, n))
     fit = np.array([objective(p) for p in pos])
@@ -115,24 +107,16 @@ def firefly_algorithm(objective, bounds, pop_size, max_iter):
     best_fit = fit[bi]
 
     for _ in range(max_iter):
-        # ── Pairwise differences: (pop, pop, dim) ────────────────────────
-        diff = pos[:, None, :] - pos[None, :, :]          # (i, j, dim)
-        sq_dist = (diff ** 2).sum(axis=-1)                 # (i, j)
-        beta_mat = beta0 * np.exp(-gamma * sq_dist)        # (i, j) — skip sqrt
+        diff = pos[:, None, :] - pos[None, :, :]
+        sq_dist = (diff ** 2).sum(axis=-1)
+        beta_mat = beta0 * np.exp(-gamma * sq_dist)
 
-        # ── Attraction mask: attract[i,j]=1 iff firefly j is brighter than i
-        attract = (fit[None, :] < fit[:, None]).astype(np.float64)  # (i, j)
-
-        # ── Net move for every firefly in one vectorised step ─────────────
-        # beta_mat[i,j] * attract[i,j] * diff[i,j,d]  summed over j → (i, dim)
-        weights = beta_mat * attract                        # (i, j)
-        # diff[i,j] = pos[i] - pos[j]; attraction pulls i TOWARD j → negate
-        move = -(weights[:, :, None] * diff).sum(axis=1)   # (i, dim)
+        attract = (fit[None, :] < fit[:, None]).astype(np.float64)
+        weights = beta_mat * attract
+        move = -(weights[:, :, None] * diff).sum(axis=1)
         move += alpha * np.random.uniform(-0.5, 0.5, (pop_size, n))
 
         new_pos = np.clip(pos + move, lower, upper)
-
-        # ── Evaluate each firefly ONCE per iteration ──────────────────────
         new_fit = np.array([objective(p) for p in new_pos])
 
         improved = new_fit < fit

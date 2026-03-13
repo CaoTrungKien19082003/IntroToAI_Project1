@@ -11,14 +11,14 @@
   [C] Greedy            50.00000       0.00000      50.00000      50.00000     0.0001    0.0%
   [C] HC                50.00000       0.00000      50.00000      50.00000     0.0001    0.0%
   [C] DFS              154.00000       0.00000     154.00000     154.00000     0.0001    0.0%
-      GA                     inf       0.00000           inf           inf     0.7988    0.0%
-      DE                     inf       0.00000           inf           inf     2.3972    0.0%
-      ACO                    inf       0.00000           inf           inf     2.7662    0.0%
-      PSO                    inf       0.00000           inf           inf     0.1555    0.0%
-      ABC                    inf       0.00000           inf           inf     2.3297    0.0%
-      FA                     inf       0.00000           inf           inf     0.4226    0.0%
-      CS                     inf       0.00000           inf           inf     0.8378    0.0%
-      TLBO                   inf       0.00000           inf           inf     2.4506    0.0%
+      GA                     inf       0.00000           inf           inf     0.8172    0.0%
+      DE                     inf       0.00000           inf           inf     2.6159    0.0%
+      ACO                    inf       0.00000           inf           inf     2.9081    0.0%
+      PSO                    inf       0.00000           inf           inf     0.1561    0.0%
+      ABC                    inf       0.00000           inf           inf     2.6566    0.0%
+      FA                     inf       0.00000           inf           inf     0.4565    0.0%
+      CS                     inf       0.00000           inf           inf     0.8271    0.0%
+      TLBO                   inf       0.00000           inf           inf     2.6110    0.0%
 
   Global best = 34.00000  |  %Hit = % of runs reaching global best (tol=3.40e-05)
 ======================================================================================================

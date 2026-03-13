@@ -49,8 +49,6 @@ CONT_PROBLEMS = {
 }
 
 def _make_toy_tsp(seed):
-    """6-city TSP on a random Euclidean grid.
-    Returns: obj, fit, bounds, init, hc, sa, (coords, dist)"""
     rng = np.random.RandomState(seed); n = 6
     coords = rng.randint(10, 100, (n, 2)).astype(np.float64)
     d = coords[:,None,:] - coords[None,:,:]
@@ -67,11 +65,6 @@ def _make_toy_tsp(seed):
     return obj, fit, bounds, init, hc, sa, (coords, dist)
 
 def _make_toy_ks(seed):
-    """10-item knapsack with random weights/values.
-    Returns: obj_meta, fit, bounds, init, hc, sa, (kw, kv, kcap)
-    obj_meta  — thresholds continuous [0,1] input to binary before evaluating
-    fit       — expects binary input (used by classic HC/SA/BFS/etc.)
-    """
     rng = np.random.RandomState(seed); n = 10
     kw = rng.randint(5, 30, n); kv = rng.randint(20, 100, n)
     kcap = int(0.40 * kw.sum())
@@ -88,11 +81,6 @@ def _make_toy_ks(seed):
     return obj_meta, fit, bounds, init, hc, sa, (kw, kv, kcap)
 
 def _make_toy_gcp(seed):
-    """6-vertex graph coloring with random adjacency (density≈0.5, 4 colors).
-    Returns: obj_meta, fit, bounds, init, hc, sa, (adj, n_colors)
-    obj_meta  — floor-scales continuous [0, nc+1] input to discrete colors
-    fit       — expects integer color input (used by classic HC/SA/BFS/etc.)
-    """
     rng = np.random.RandomState(seed); n = 6; nc = 4
     r = rng.rand(n, n); adj = ((r+r.T)/2 > 0.5).astype(np.int32)
     np.fill_diagonal(adj, 0); ri, ci = np.where(np.triu(adj,1))
@@ -109,7 +97,6 @@ def _make_toy_gcp(seed):
     return obj_meta, fit, bounds, init, hc, sa, (adj, nc)
 
 def _make_toy_sp(seed):
-    """6-node DAG with random edge costs (max-hop=2, density≈0.6)."""
     rng = np.random.RandomState(seed); n = 6; S, G = 0, n-1
     raw = rng.rand(n, n)
     mask = np.zeros((n,n), dtype=bool)

@@ -136,7 +136,7 @@ def a_star_search(cost_matrix, heuristic, start, goal):
     g = np.full(n, np.inf)
     g[start] = 0
     parent = np.full(n, -1, dtype=int)
-    pq = [(heuristic[start], start)]  # (f = g + h, node)
+    pq = [(heuristic[start], start)]
     visited = np.zeros(n, dtype=bool)
     
     while pq:

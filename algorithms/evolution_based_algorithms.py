@@ -3,20 +3,17 @@ import random
 import time
 
 def genetic_algorithm(objective, bounds, pop_size, max_iter):
-    """Genetic Algorithm (continuous minimization)"""
     n_dims = bounds.shape[0]
     population = np.random.uniform(bounds[:, 0], bounds[:, 1], (pop_size, n_dims))
     fitness = np.array([objective(ind) for ind in population])
     
     for _ in range(max_iter):
-        # Tournament selection
         selected = []
         for __ in range(pop_size):
             idx = np.random.choice(pop_size, 2)
             selected.append(population[idx[np.argmin(fitness[idx])]])
         selected = np.array(selected)
         
-        # Single-point crossover
         offspring = []
         for i in range(0, pop_size, 2):
             p1, p2 = selected[i], selected[(i+1)%pop_size]
@@ -26,7 +23,6 @@ def genetic_algorithm(objective, bounds, pop_size, max_iter):
             offspring.extend([c1, c2])
         offspring = np.array(offspring[:pop_size])
         
-        # Mutation
         mutation_rate = 0.01
         for i in range(pop_size):
             if np.random.rand() < mutation_rate:
@@ -35,7 +31,6 @@ def genetic_algorithm(objective, bounds, pop_size, max_iter):
         offspring = np.clip(offspring, bounds[:, 0], bounds[:, 1])
         offspring_fitness = np.array([objective(ind) for ind in offspring])
         
-        # Elitism + replacement
         combined = np.vstack((population, offspring))
         combined_fitness = np.hstack((fitness, offspring_fitness))
         indices = np.argsort(combined_fitness)[:pop_size]
@@ -47,7 +42,6 @@ def genetic_algorithm(objective, bounds, pop_size, max_iter):
 
 
 def differential_evolution(objective, bounds, pop_size, max_iter):
-    """Differential Evolution"""
     n_dims = bounds.shape[0]
     population = np.random.uniform(bounds[:, 0], bounds[:, 1], (pop_size, n_dims))
     fitness = np.array([objective(ind) for ind in population])
